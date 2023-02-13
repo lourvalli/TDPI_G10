@@ -9,13 +9,13 @@
 
 #define FAN_PIN			GPIO0
 #define SPRINKLER_PIN	GPIO2
-#define DHT_PIN		GPIO4
+#define DHT_PIN         GPIO4
 
+void init();
 void initGPIOs();
-void pantallaPpal_a_string(void);
 void printUart( char * msg);
-void init ();
-void sendStatus(float humidity, float temperature, unsigned int light, unsigned int sprinkler, unsigned int fan);
+void writeMQTT(float humidity, float temperature, unsigned int light, unsigned int sprinkler, unsigned int fan);
+void writeLCD(float humidity, float temperature, unsigned int light, unsigned int sprinkler, unsigned int fan);
 
 /*==================[inclusiones]============================================*/
 
