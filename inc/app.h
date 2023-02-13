@@ -7,14 +7,15 @@
 #ifndef _APP_H_
 #define _APP_H_
 
-#define FAN			GPIO0
-#define SPRINKLER	GPIO2
-#define DHT22		GPIO4
-
-#define FAN_BUTTON			TEC1
-#define SPRINKLER_BUTTON	TEC2
+#define FAN_PIN			GPIO0
+#define SPRINKLER_PIN	GPIO2
+#define DHT22_PIN		GPIO4
 
 void initGPIOs();
+void pantallaPpal_a_string(void);
+void printUart( char * msg);
+void init ();
+void sendStatus(float humidity, float temperature, unsigned int light, unsigned int sprinkler, unsigned int fan);
 
 /*==================[inclusiones]============================================*/
 
