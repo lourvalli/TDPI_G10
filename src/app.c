@@ -1,15 +1,14 @@
 #include "app.h"         // <= Su propia cabecera
 #include "sapi.h"        // <= Biblioteca sAPI
-//#include "lcd.h"       // <= Biblioteca para manejo de LCD
 
-
+/*
 void dht11ReadMock (float * humidity, float * temperature){
    if(*humidity < 90) *humidity +=10;
       else *humidity = 0;
    if(*temperature < 50) *temperature +=5;
       else *temperature = 0;
 }
-
+*/
 
 int main( void )
 {
@@ -51,8 +50,8 @@ int main( void )
          printUart( "Ventilador apagado.\r\n" );
       }
 
-      writeMQTT(humidity,temperature,light,sprinkler,fan);
-      //writeLCD(humidity,temperature,light,sprinkler,fan);
+      sendStatus(humidity,temperature,light,sprinkler,fan);
+      
 
       // Esperar durante 30 segundos
       delay(30000);
@@ -77,8 +76,10 @@ void init(){
    /* Inicializar UART_USB a 115200 baudios */
    uartConfig( UART_232, 115200 );
    
-   /* Inicializar LCD */
-   //LCD_init(DISPLAY_8X5|_2_LINES,DISPLAY_ON|CURSOR_OFF|CURSOR_BLINK);
+   /* Inicializar LCD de 16x2 (caracteres x lineas) con cada caracter de 5x8 pixeles */
+   //lcdInit( 16, 2, 5, 8 );
+   //lcdCursorSet( LCD_CURSOR_OFF ); // Apaga el cursor
+   //lcdClear();                     // Borrar la pantalla
 }
 
 void initGPIOs() {
@@ -89,26 +90,34 @@ void initGPIOs() {
 void printUart( char * msg){
    uartWriteString( UART_232, msg);
 }
+void sendStatus(float humidity, float temperature, unsigned int light, unsigned int sprinkler, unsigned int fan){
+	writeMQTT( humidity,  temperature,  light, sprinkler, fan);
+	//writeLCD( humidity,  temperature,  light, sprinkler, fan);
+}
 
 void writeMQTT(float humidity, float temperature, unsigned int light, unsigned int sprinkler, unsigned int fan){
-   char *status [2] = {"OFF","ON"};
-   char buffer[100];
+   static char *status [2] = {"OFF","ON"};
+   static char buffer[100];
+   
    sprintf(buffer,"Humedad: %d%% | Temperatura: %d | Luz: %d%% | Aspersores: %s | Ventiladores: %s\n", (int) humidity, (int) temperature, light, status[sprinkler], status[fan]);
    
    // send data to MQTT through ESP8266
    printUart(buffer);
 }
 
-void writeLCD(char *buffer) {
-   char *status[] = {"ON ", "OFF"};
-   char line1[] = printf("T:%.1f H:%d%% L:%d%%", temp, hum, light);
-   char line2[] = printf("  V:%s  A:%s  ", status[sprinkler], status[fan]);
+void writeLCD(float humidity, float temperature, unsigned int light, unsigned int sprinkler, unsigned int fan) {
+   static char *status[2] = {"OFF","ON "};
+   static char line1[16];
+   static char line2[16];
 
+   sprintf(line1,"T:%d H:%d%% L:%d%%", (int) temperature, (int) humidity, light);
+   sprintf(line2,"  V:%s  A:%s  ", status[sprinkler], status[fan]);
 
-   LCD_write_char('\f');
-   LCD_write_string(&line1);
-   LCD_write_char('\r');
-   LCD_write_string(&line2);
+   lcdGoToXY( 0, 0 ); // Poner cursor en 0, 0
+   lcdSendStringRaw( line1 );
+
+   lcdGoToXY( 0, 1 ); // Poner cursor en 0, 1
+   lcdSendStringRaw( line2 );
 
 }
 

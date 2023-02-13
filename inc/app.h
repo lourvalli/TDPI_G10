@@ -16,6 +16,7 @@ void initGPIOs();
 void printUart( char * msg);
 void writeMQTT(float humidity, float temperature, unsigned int light, unsigned int sprinkler, unsigned int fan);
 void writeLCD(float humidity, float temperature, unsigned int light, unsigned int sprinkler, unsigned int fan);
+void sendStatus(float humidity, float temperature, unsigned int light, unsigned int sprinkler, unsigned int fan);
 
 /*==================[inclusiones]============================================*/
 
