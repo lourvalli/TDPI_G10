@@ -9,7 +9,7 @@
 
 #define FAN_PIN			GPIO0
 #define SPRINKLER_PIN	GPIO2
-#define DHT22_PIN		GPIO4
+#define DHT_PIN		GPIO4
 
 void initGPIOs();
 void pantallaPpal_a_string(void);

@@ -1,19 +1,19 @@
 #include "app.h"         // <= Su propia cabecera
 #include "sapi.h"        // <= Biblioteca sAPI
-#include "dht.h"
 //#include "lcd.h"
 
 
-void read_dht(float * humidity, float * temperature){
-   if(*humidity < 90) *humidity += 15;
-   else *humidity = 0;
-      
-    if(*temperature < 50) *temperature += 10;
-   else *temperature = 0;
-}
-
 char line1[16],line2[16];
 static char uartBuff[100];
+static char *  cons [2] = {"OFF","ON"};
+
+void dht11ReadMock (float * humidity, float * temperature){
+   if(*humidity < 90) *humidity +=10;
+      else *humidity = 0;
+   if(*temperature < 50) *temperature +=5;
+      else *temperature = 0;
+}
+
 
 int main( void )
 {
@@ -25,10 +25,9 @@ int main( void )
    unsigned char fan = 0;
 
    while( TRUE ) {
-      //TODO Mocked
-      read_dht(&humidity,&temperature);
-      
-      light = adcRead( CH1 );
+      dht11Read(&humidity,&temperature);
+      light = 100 - adcRead( CH1 )*100/1024;
+      gpioWrite( GPIO4, ON );
 
       sendStatus(humidity,temperature,light,sprinkler,fan);
       
@@ -60,7 +59,7 @@ int main( void )
       //LCD_write_char('\r');
       //LCD_write_string(&line2);
       
-      delay(10000);
+      delay(5000);
          
    }
    
@@ -79,7 +78,8 @@ void printUart( char * msg){
 void init(){
    // Inicializar y configurar la plataforma
    boardConfig();
-
+   
+   dht11Init(DHT_PIN);
    /* Inicializar UART_USB a 115200 baudios */
    uartConfig( UART_232, 115200 );
 
@@ -127,7 +127,7 @@ void pantallaPpal_a_string() {
 }
 
 void sendStatus(float humidity, float temperature, unsigned int light, unsigned int sprinkler, unsigned int fan){
-   sprintf(uartBuff,"Humedad: %d | Temperatura: %d | Luz: %d | Aspersores: %d | Ventiladores: %d\n",(int) humidity,(int) temperature,light,sprinkler,fan);
+   sprintf(uartBuff,"Humedad: %d%% | Temperatura: %d | Luz: %d%% | Aspersores: %s | Ventiladores: %s\n",(int) humidity,(int) temperature,light,cons[sprinkler],cons[fan]);
    printUart(uartBuff);
 }
 

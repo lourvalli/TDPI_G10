@@ -23,8 +23,8 @@
 
 // Update these with values suitable for your network.
 
-const char* ssid = "...";
-const char* password = "...";
+const char* ssid = "WIFI_SSID";
+const char* password = "WIFI_PASS";
 const char* mqtt_server = "broker.mqtt-dashboard.com";
 const char* outTopic = "TDP1-2022-OUT";
 
