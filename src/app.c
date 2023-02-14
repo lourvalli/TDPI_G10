@@ -2,11 +2,12 @@
 #include "sapi.h"        // <= Biblioteca sAPI
 
 /*
-void dht11ReadMock (float * humidity, float * temperature){
+bool_t dht11ReadMock (float * humidity, float * temperature){
    if(*humidity < 90) *humidity +=10;
       else *humidity = 0;
    if(*temperature < 50) *temperature +=5;
       else *temperature = 0;
+   return true;
 }
 */
 
@@ -24,38 +25,36 @@ int main( void )
       light = 100 - adcRead( CH1 )*100/1024;
 
       // read humidity and temperature from DHT22      
-      dht11Read(&humidity,&temperature);
+      if(dht11Read(&humidity,&temperature)){
+         // control sprinkler
+         if (humidity < 50 & !sprinkler) {
+            sprinkler = true;
+            gpioWrite( SPRINKLER_PIN, ON );
+            printUart( "Aspersor encendido.\r\n" );
+         }
+         else if (humidity > 60 & sprinkler) {
+            sprinkler = false;
+            gpioWrite( SPRINKLER_PIN, OFF );
+            printUart( "Aspersor apagado.\r\n" );
+         }
 
-      // control sprinkler
-      if (humidity < 50 & !sprinkler) {
-         sprinkler = true;
-         gpioWrite( SPRINKLER_PIN, ON );
-         printUart( "Aspersor encendido.\r\n" );
+         // control fan
+         if (temperature > 25 & !fan) {
+            fan = true;
+            gpioWrite( FAN_PIN, ON );
+            printUart( "Ventilador encendido.\r\n" );
+         }
+         else if (temperature < 23 & fan) {
+            fan = false;
+            gpioWrite( FAN_PIN, OFF );
+            printUart( "Ventilador apagado.\r\n" );
+         }
       }
-      else if (humidity > 60 & sprinkler) {
-         sprinkler = false;
-         gpioWrite( SPRINKLER_PIN, OFF );
-         printUart( "Aspersor apagado.\r\n" );
-      }
-
-      // control fan
-      if (temperature > 25 & !fan) {
-         fan = true;
-         gpioWrite( FAN_PIN, ON );
-         printUart( "Ventilador encendido.\r\n" );
-      }
-      else if (temperature < 23 & fan) {
-         fan = false;
-         gpioWrite( FAN_PIN, OFF );
-         printUart( "Ventilador apagado.\r\n" );
-      }
-
+   
       sendStatus(humidity,temperature,light,sprinkler,fan);
-      
 
       // Esperar durante 30 segundos
-      delay(30000);
-         
+      delay(30000);         
    }
    
    return 0;
@@ -80,6 +79,9 @@ void init(){
    //lcdInit( 16, 2, 5, 8 );
    //lcdCursorSet( LCD_CURSOR_OFF ); // Apaga el cursor
    //lcdClear();                     // Borrar la pantalla
+   
+   //Tiempo para que se estabilice el dht y el esp
+   delay(10000);
 }
 
 void initGPIOs() {
