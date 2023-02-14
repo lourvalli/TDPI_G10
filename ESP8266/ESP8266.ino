@@ -68,7 +68,7 @@ void reconnect() {
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish(outTopic, "hello world");
+      client.publish(outTopic, "Conectado");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
